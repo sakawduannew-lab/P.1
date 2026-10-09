@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🐰 เขาวงกตมหาสนุก ป.1</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Tahoma", "Arial", sans-serif;
+    background: linear-gradient(135deg, #c8f7ff, #fff4b8);
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 900px;
+
+    background: white;
+    border-radius: 30px;
+
+    padding: 25px;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+
+    text-align: center;
+}
+
+h1 {
+    margin: 5px 0;
+
+    font-size: 38px;
+
+    color: #ff6b6b;
+}
+
+.subtitle {
+    font-size: 20px;
+    color: #555;
+
+    margin-bottom: 15px;
+}
+
+/* ข้อมูลเกม */
+
+.info {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin-bottom: 15px;
+}
+
+.info-box {
+    padding: 10px 18px;
+
+    border-radius: 18px;
+
+    font-size: 19px;
+
+    font-weight: bold;
+}
+
+.score {
+    background: #fff0a8;
+}
+
+.time {
+    background: #b9fbc0;
+}
+
+.level {
+    background: #bde0fe;
+}
+
+/* เขาวงกต */
+
+#maze {
+
+    display: grid;
+
+    margin: 15px auto;
+
+    width: min(80vw, 560px);
+
+    aspect-ratio: 1 / 1;
+
+    border: 8px solid #7357d9;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    background: #eee;
+}
+
+.cell {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: clamp(18px, 4vw, 35px);
+
+    user-select: none;
+}
+
+.wall {
+    background: #7357d9;
+}
+
+.path {
+    background: #fffdf2;
+}
+
+.goal {
+    background: #caffbf;
+}
+
+/* ข้อความ */
+
+.message {
+
+    min-height: 35px;
+
+    font-size: 21px;
+
+    font-weight: bold;
+
+    color: #ff6b6b;
+
+    margin: 10px;
+}
+
+/* ปุ่ม */
+
+button {
+
+    border: none;
+
+    cursor: pointer;
+
+    font-family: inherit;
+
+    font-weight: bold;
+}
+
+.new-game {
+
+    background: #ff6b6b;
+
+    color: white;
+
+    font-size: 19px;
+
+    padding: 12px 24px;
+
+    border-radius: 20px;
+
+    box-shadow: 0 5px 0 #d94d4d;
+
+    margin: 5px;
+}
+
+.next-level {
+
+    background: #51cf66;
+
+    color: white;
+
+    font-size: 19px;
+
+    padding: 12px 24px;
+
+    border-radius: 20px;
+
+    box-shadow: 0 5px 0 #37a84a;
+
+    margin: 5px;
+}
+
+button:active {
+
+    transform: translateY(4px);
+}
+
+/* ปุ่มควบคุม */
+
+.controls {
+
+    margin: 15px auto;
+
+    width: 190px;
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 60px);
+
+    gap: 8px;
+
+    justify-content: center;
+}
+
+.control {
+
+    width: 60px;
+
+    height: 55px;
+
+    border-radius: 15px;
+
+    background: #74c0fc;
+
+    color: white;
+
+    font-size: 25px;
+
+    box-shadow: 0 4px 0 #4d9de0;
+}
+
+.empty {
+    visibility: hidden;
+}
+
+/* คำแนะนำ */
+
+.instructions {
+
+    margin-top: 15px;
+
+    background: #f1f3f5;
+
+    border-radius: 15px;
+
+    padding: 12px;
+
+    font-size: 17px;
+}
+
+/* Modal */
+
+.modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.5);
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 100;
+}
+
+.modal-content {
+
+    background: white;
+
+    width: 90%;
+
+    max-width: 480px;
+
+    border-radius: 30px;
+
+    padding: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+
+    color: #ff6b6b;
+
+    font-size: 35px;
+}
+
+.emoji {
+
+    font-size: 60px;
+}
+
+/* ดาว */
+
+.star {
+
+    animation: starMove 1s infinite alternate;
+}
+
+@keyframes starMove {
+
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.2);
+    }
+
+}
+
+/* กระต่าย */
+
+.player {
+
+    animation: bunnyMove 0.5s infinite alternate;
+}
+
+@keyframes bunnyMove {
+
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-3px);
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game-container">
+
+    <h1>🐰 เขาวงกตมหาสนุก 🌈</h1>
+
+    <div class="subtitle">
+        พาน้องกระต่ายผ่านเขาวงกตให้ครบทุกด่าน! 🥕
+    </div>
+
+    <div class="info">
+
+        <div class="info-box score">
+            ⭐ คะแนน: <span id="score">0</span>
+        </div>
+
+        <div class="info-box time">
+            ⏰ เวลา: <span id="time">60</span>
+        </div>
+
+        <div class="info-box level">
+            🏆 ด่าน: <span id="level">1</span>
+            / <span id="totalLevel">1</span>
+        </div>
+
+    </div>
+
+    <div id="maze"></div>
+
+    <div class="message" id="message">
+        ใช้ปุ่มลูกศรพาน้องกระต่ายไปหาแครอท!
+    </div>
+
+    <button class="new-game" onclick="restartGame()">
+        🔄 เริ่มเกมใหม่
+    </button>
+
+    <div class="controls">
+
+        <button class="control empty"></button>
+
+        <button class="control"
+                onclick="move(0,-1)">
+            ⬆️
+        </button>
+
+        <button class="control empty"></button>
+
+        <button class="control"
+                onclick="move(-1,0)">
+            ⬅️
+        </button>
+
+        <button class="control"
+                onclick="move(0,1)">
+            ⬇️
+        </button>
+
+        <button class="control"
+                onclick="move(1,0)">
+            ➡️
+        </button>
+
+    </div>
+
+    <div class="instructions">
+
+        💡 เดินด้วยปุ่มลูกศร<br>
+
+        ⭐ เก็บดาวเพื่อรับคะแนน<br>
+
+        🥕 ไปถึงแครอทเพื่อผ่านด่าน
+
+    </div>
+
+</div>
+
+
+<!-- หน้าต่างผ่านด่าน -->
+
+<div class="modal" id="levelModal">
+
+    <div class="modal-content">
+
+        <div class="emoji">
+            🎉🐰⭐
+        </div>
+
+        <h2>
+            เก่งมาก!
+        </h2>
+
+        <p id="levelMessage">
+            ผ่านด่านแล้ว!
+        </p>
+
+        <p>
+            คะแนนรวม:
+            <strong id="modalScore">0</strong>
+            ⭐
+        </p>
+
+        <button
+            class="next-level"
+            onclick="nextLevel()">
+
+            ▶️ ไปด่านถัดไป
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- หน้าต่างจบเกม -->
+
+<div class="modal" id="finishModal">
+
+    <div class="modal-content">
+
+        <div class="emoji">
+            🏆🐰🎉
+        </div>
+
+        <h2>
+            สุดยอด!
+        </h2>
+
+        <p>
+            หนูผ่านครบทุกด่านแล้ว!
+        </p>
+
+        <p>
+            คะแนนรวม:
+            <strong id="finalScore">0</strong>
+            ⭐
+        </p>
+
+        <button
+            class="new-game"
+            onclick="restartGame(); closeFinishModal();">
+
+            🔄 เล่นใหม่
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   🧩 ข้อมูลเขาวงกตแต่ละด่าน
+   1 = กำแพง
+   0 = ทางเดิน
+   ===================================================== */
+
+const levels = [
+
+    /* =====================
+       ด่าน 1 : ง่าย
+       ===================== */
+
+    {
+        time: 60,
+
+        maze: [
+
+            [1,1,1,1,1,1,1,1,1],
+
+            [1,0,0,0,1,0,0,0,1],
+
+            [1,0,1,0,1,0,1,0,1],
+
+            [1,0,1,0,0,0,1,0,1],
+
+            [1,0,1,1,1,0,1,0,1],
+
+            [1,0,0,0,0,0,1,0,1],
+
+            [1,1,1,1,0,1,1,0,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,1,1,1,1,1]
+
+        ],
+
+        start: {
+            x:1,
+            y:1
+        },
+
+        goal: {
+            x:7,
+            y:7
+        }
+
+    },
+
+
+    /* =====================
+       ด่าน 2
+       ===================== */
+
+    {
+        time: 55,
+
+        maze: [
+
+            [1,1,1,1,1,1,1,1,1],
+
+            [1,0,0,1,0,0,0,0,1],
+
+            [1,1,0,1,0,1,1,0,1],
+
+            [1,0,0,0,0,1,0,0,1],
+
+            [1,0,1,1,1,1,0,1,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,1,1,1,0,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,1,1,1,1,1]
+
+        ],
+
+        start: {
+            x:1,
+            y:1
+        },
+
+        goal: {
+            x:7,
+            y:7
+        }
+
+    },
+
+
+    /* =====================
+       ด่าน 3
+       ===================== */
+
+    {
+        time: 50,
+
+        maze: [
+
+            [1,1,1,1,1,1,1,1,1],
+
+            [1,0,0,0,1,0,0,0,1],
+
+            [1,0,1,0,1,0,1,0,1],
+
+            [1,0,1,0,0,0,1,0,1],
+
+            [1,0,1,1,1,1,1,0,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,0,1,1,1,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,1,1,1,1,1]
+
+        ],
+
+        start: {
+            x:1,
+            y:1
+        },
+
+        goal: {
+            x:7,
+            y:7
+        }
+
+    },
+
+
+    /* =====================
+       ด่าน 4
+       ===================== */
+
+    {
+        time: 45,
+
+        maze: [
+
+            [1,1,1,1,1,1,1,1,1],
+
+            [1,0,1,0,0,0,0,0,1],
+
+            [1,0,1,0,1,1,1,0,1],
+
+            [1,0,0,0,1,0,0,0,1],
+
+            [1,1,1,0,1,0,1,1,1],
+
+            [1,0,0,0,0,0,1,0,1],
+
+            [1,0,1,1,1,1,1,0,1],
+
+            [1,0,0,0,0,0,0,0,1],
+
+            [1,1,1,1,1,1,1,1,1]
+
+        ],
+
+        start: {
+            x:1,
+            y:1
+        },
+
+        goal: {
+            x:7,
+            y:7
+        }
+
+    }
+
+];
+
+
+/* =====================================================
+   ตัวแปรเกม
+   ===================================================== */
+
+let currentLevel = 0;
+
+let score = 0;
+
+let time = 60;
+
+let timer;
+
+let gameOver = false;
+
+let player = {};
+
+let goal = {};
+
+let stars = [];
+
+
+/* =====================================================
+   เรียก HTML
+   ===================================================== */
+
+const mazeElement =
+    document.getElementById("maze");
+
+const scoreText =
+    document.getElementById("score");
+
+const timeText =
+    document.getElementById("time");
+
+const levelText =
+    document.getElementById("level");
+
+const totalLevelText =
+    document.getElementById("totalLevel");
+
+const message =
+    document.getElementById("message");
+
+
+totalLevelText.textContent =
+    levels.length;
+
+
+/* =====================================================
+   สร้างดาว
+   ===================================================== */
+
+function createStars() {
+
+    stars = [];
+
+    const maze = levels[currentLevel].maze;
+
+    /*
+       ตำแหน่งดาว
+       สามารถเพิ่มได้ตามต้องการ
+    */
+
+    const possibleStars = [
+
+        {x:3,y:1},
+
+        {x:5,y:3},
+
+        {x:5,y:5},
+
+        {x:2,y:7}
+
+    ];
+
+    possibleStars.forEach(star => {
+
+        if(
+            maze[star.y] &&
+            maze[star.y][star.x] === 0 &&
+            !(star.x === player.x &&
+              star.y === player.y) &&
+            !(star.x === goal.x &&
+              star.y === goal.y)
+        ) {
+
+            stars.push(star);
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   โหลดด่าน
+   ===================================================== */
+
+function loadLevel() {
+
+    clearInterval(timer);
+
+    gameOver = false;
+
+    const level = levels[currentLevel];
+
+    player = {
+        x: level.start.x,
+        y: level.start.y
+    };
+
+    goal = {
+        x: level.goal.x,
+        y: level.goal.y
+    };
+
+    time = level.time;
+
+    timeText.textContent = time;
+
+    levelText.textContent =
+        currentLevel + 1;
+
+    createStars();
+
+    drawMaze();
+
+    message.textContent =
+        "🐰 พาน้องกระต่ายไปหาแครอท!";
+
+    startTimer();
+
+}
+
+
+/* =====================================================
+   วาดเขาวงกต
+   ===================================================== */
+
+function drawMaze() {
+
+    const mazeData =
+        levels[currentLevel].maze;
+
+    const rows =
+        mazeData.length;
+
+    const cols =
+        mazeData[0].length;
+
+    mazeElement.innerHTML = "";
+
+    mazeElement.style.gridTemplateColumns =
+        `repeat(${cols}, 1fr)`;
+
+
+    for(let y = 0; y < rows; y++) {
+
+        for(let x = 0; x < cols; x++) {
+
+            const cell =
+                document.createElement("div");
+
+            cell.classList.add("cell");
+
+
+            /* กำแพง */
+
+            if(mazeData[y][x] === 1) {
+
+                cell.classList.add("wall");
+
+                cell.innerHTML = "🌳";
+
+            }
+
+            /* ทางเดิน */
+
+            else {
+
+                cell.classList.add("path");
+
+
+                /* ผู้เล่น */
+
+                if(
+                    player.x === x &&
+                    player.y === y
+                ) {
+
+                    cell.classList.add("player");
+
+                    cell.innerHTML = "🐰";
+
+                }
+
+
+                /* จุดหมาย */
+
+                else if(
+                    goal.x === x &&
+                    goal.y === y
+                ) {
+
+                    cell.classList.add("goal");
+
+                    cell.innerHTML = "🥕";
+
+                }
+
+
+                /* ดาว */
+
+                else {
+
+                    const star =
+                        stars.find(
+                            s =>
+                            s.x === x &&
+                            s.y === y
+                        );
+
+                    if(star) {
+
+                        cell.classList.add("star");
+
+                        cell.innerHTML = "⭐";
+
+                    }
+
+                }
+
+            }
+
+            mazeElement.appendChild(cell);
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   การเดิน
+   ===================================================== */
+
+function move(dx,dy) {
+
+    if(gameOver) return;
+
+
+    const mazeData =
+        levels[currentLevel].maze;
+
+
+    const newX =
+        player.x + dx;
+
+    const newY =
+        player.y + dy;
+
+
+    /* ตรวจขอบเขต */
+
+    if(
+        newX < 0 ||
+        newY < 0 ||
+        newY >= mazeData.length ||
+        newX >= mazeData[0].length
+    ) {
+
+        message.textContent =
+            "🧱 ลองไปทางอื่นนะ";
+
+        return;
+
+    }
+
+
+    /* ตรวจชนกำแพง */
+
+    if(
+        mazeData[newY][newX] === 1
+    ) {
+
+        message.textContent =
+            "🧱 เจอกำแพงแล้ว! ลองเปลี่ยนทาง";
+
+        return;
+
+    }
+
+
+    /* เดิน */
+
+    player.x = newX;
+
+    player.y = newY;
+
+
+    /* เก็บดาว */
+
+    const starIndex =
+        stars.findIndex(
+            s =>
+            s.x === player.x &&
+            s.y === player.y
+        );
+
+
+    if(starIndex !== -1) {
+
+        stars.splice(starIndex,1);
+
+        score += 10;
+
+        scoreText.textContent =
+            score;
+
+        message.textContent =
+            "⭐ เยี่ยมมาก! +10 คะแนน";
+
+    }
+
+
+    /* ถึงเป้าหมาย */
+
+    if(
+        player.x === goal.x &&
+        player.y === goal.y
+    ) {
+
+        completeLevel();
+
+    }
+
+
+    drawMaze();
+
+}
+
+
+/* =====================================================
+   ผ่านด่าน
+   ===================================================== */
+
+function completeLevel() {
+
+    gameOver = true;
+
+    clearInterval(timer);
+
+
+    /*
+       โบนัสเวลาที่เหลือ
+    */
+
+    score += time;
+
+    scoreText.textContent =
+        score;
+
+
+    document.getElementById(
+        "modalScore"
+    ).textContent = score;
+
+
+    /* ด่านสุดท้าย */
+
+    if(
+        currentLevel === levels.length - 1
+    ) {
+
+        document.getElementById(
+            "finalScore"
+        ).textContent = score;
+
+
+        document.getElementById(
+            "finishModal"
+        ).style.display = "flex";
+
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "levelMessage"
+    ).textContent =
+        `🎉 ผ่านด่าน ${currentLevel + 1} แล้ว!`;
+
+
+    document.getElementById(
+        "levelModal"
+    ).style.display = "flex";
+
+}
+
+
+/* =====================================================
+   ไปด่านต่อไป
+   ===================================================== */
+
+function nextLevel() {
+
+    document.getElementById(
+        "levelModal"
+    ).style.display = "none";
+
+
+    currentLevel++;
+
+    loadLevel();
+
+}
+
+
+/* =====================================================
+   จับเวลา
+   ===================================================== */
+
+function startTimer() {
+
+    clearInterval(timer);
+
+
+    timer = setInterval(() => {
+
+        if(gameOver) return;
+
+
+        time--;
+
+        timeText.textContent =
+            time;
+
+
+        if(time <= 0) {
+
+            clearInterval(timer);
+
+            gameOver = true;
+
+
+            message.textContent =
+                "⏰ หมดเวลาแล้ว ลองใหม่อีกครั้งนะ!";
+
+        }
+
+    },1000);
+
+}
+
+
+/* =====================================================
+   เริ่มเกมใหม่
+   ===================================================== */
+
+function restartGame() {
+
+    currentLevel = 0;
+
+    score = 0;
+
+    scoreText.textContent = 0;
+
+    loadLevel();
+
+}
+
+
+/* =====================================================
+   ปิดหน้าต่าง
+   ===================================================== */
+
+function closeFinishModal() {
+
+    document.getElementById(
+        "finishModal"
+    ).style.display = "none";
+
+}
+
+
+/* =====================================================
+   คีย์บอร์ด
+   ===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        if(
+            e.key === "ArrowUp" ||
+            e.key.toLowerCase() === "w"
+        ) {
+
+            e.preventDefault();
+
+            move(0,-1);
+
+        }
+
+
+        else if(
+            e.key === "ArrowDown" ||
+            e.key.toLowerCase() === "s"
+        ) {
+
+            e.preventDefault();
+
+            move(0,1);
+
+        }
+
+
+        else if(
+            e.key === "ArrowLeft" ||
+            e.key.toLowerCase() === "a"
+        ) {
+
+            e.preventDefault();
+
+            move(-1,0);
+
+        }
+
+
+        else if(
+            e.key === "ArrowRight" ||
+            e.key.toLowerCase() === "d"
+        ) {
+
+            e.preventDefault();
+
+            move(1,0);
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   เริ่มเกม
+   ===================================================== */
+
+restartGame();
+
+</script>
+
+</body>
+</html>
